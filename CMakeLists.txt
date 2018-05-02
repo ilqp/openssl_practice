@@ -37,10 +37,10 @@ endif()
 ######################################################################
 # 	Openssl stuff
 ######################################################################
-FILE(GLOB AESGCM_SOURCES aesgcm.c)
+FILE(GLOB AESGCM_SOURCES aesgcm.c fops.c)
 ADD_EXECUTABLE(aesgcm ${AESGCM_SOURCES})
 TARGET_LINK_LIBRARIES(aesgcm ${OPENSSL_LIBRARY})
-TARGET_INCLUDE_DIRECTORIES(aesgcm PUBLIC ${OPENSSL_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(aesgcm PUBLIC ${OPENSSL_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 ADD_CUSTOM_TARGET(run
 	COMMAND ./aesgcm

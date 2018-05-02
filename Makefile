@@ -11,6 +11,10 @@
 CFLAGS = $(OPENSSL_INCS_LOCATION)
 LDFLAGS = $(OPENSSL_LIBS_LOCATION) -lssl -lcrypto
 
+define run
+	cd build && ./aesgcm
+endef
+
 all: aesccm aesgcm
 
 aesccm: aesccm.o
@@ -25,7 +29,11 @@ rbuild: build
 fbuild: clean
 	mkdir build && cd build && cmake ../ && make
 
-run: rbuild
-	cd build && ./aesgcm
+frun: fbuild
+	$(call run)
+
+rrun: rbuild
+	$(call run)
+
 clean:
 	rm -rf build
