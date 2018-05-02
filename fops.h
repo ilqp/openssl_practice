@@ -12,3 +12,5 @@ typedef struct _fops_type {
 } FOPS_TYPE;
 
 FOPS_TYPE fops_read(char *path);
+void fops_write(char *path, FOPS_TYPE input);
+void fops_clear(FOPS_TYPE fops);

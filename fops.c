@@ -50,6 +50,9 @@ FOPS_TYPE fops_read(char *path) {
 	tmp_file.data = fops_fread(fp);
 
 	fops_fclose(fp);
+
+	tmp_file.in_use = 1;
+
 	return tmp_file;
 }
 
@@ -58,4 +61,12 @@ void fops_write(char *path, FOPS_TYPE input) {
 	assert(fops_fok(fp));
 
 	fops_fwrite(fp, input);
+}
+
+void fops_clear(FOPS_TYPE fops) {
+	if(fops.data) {
+		free(fops.data);
+	}
+	fops.length=0;
+	fops.in_use = 0;
 }
