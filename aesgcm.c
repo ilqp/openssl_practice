@@ -37,15 +37,10 @@ static const unsigned char gcm_aad[] = {
 	0x7f, 0xec, 0x78, 0xde
 };
 
-static const unsigned char gcm_ct[] = {
-	0xf7, 0x26, 0x44, 0x13, 0xa8, 0x4c, 0x0e, 0x7c, 0xd5, 0x36, 0x86, 0x7e,
-	0xb9, 0xf2, 0x17, 0x36
-};
-
-static const unsigned char gcm_tag[] = {
-	0x67, 0xba, 0x05, 0x10, 0x26, 0x2a, 0xe4, 0x87, 0xd7, 0x37, 0xee, 0x62,
-	0x98, 0xf7, 0x7e, 0x0c
-};
+unsigned char cipher_buffer[20480];
+unsigned char plain_buffer[20480];
+unsigned char tag_buffer[16];
+int cipher_len, plain_len, tag_len;
 
 void aes_gcm_encrypt(void)
 {
@@ -63,24 +58,25 @@ void aes_gcm_encrypt(void)
 	EVP_EncryptInit_ex(ctx, NULL, NULL, gcm_key, gcm_iv);
 
 	/* Zero or more calls to specify any AAD */
-	EVP_EncryptUpdate(ctx, NULL, &outlen, gcm_aad, sizeof(gcm_aad));
+	EVP_EncryptUpdate(ctx, NULL, &cipher_len, gcm_aad, sizeof(gcm_aad));
 
 	/* Encrypt plaintext */
-	EVP_EncryptUpdate(ctx, outbuf, &outlen, gcm_pt, sizeof(gcm_pt));
+	EVP_EncryptUpdate(ctx, cipher_buffer, &cipher_len, gcm_pt, sizeof(gcm_pt));
 
 	/* Output encrypted block */
 	printf("Ciphertext:\n");
-	BIO_dump_fp(stdout, outbuf, outlen);
+	BIO_dump_fp(stdout, cipher_buffer, cipher_len);
 
 	/* Finalise: note get no output for GCM */
-	EVP_EncryptFinal_ex(ctx, outbuf, &outlen);
+	EVP_EncryptFinal_ex(ctx, tag_buffer, &tag_len);
 
 	/* Get tag */
-	EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, 16, outbuf);
+	EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, 16, tag_buffer);
+	tag_len = 16;
 
 	/* Output tag */
 	printf("Tag:\n");
-	BIO_dump_fp(stdout, outbuf, 16);
+	BIO_dump_fp(stdout, tag_buffer, tag_len);
 	EVP_CIPHER_CTX_free(ctx);
 }
 
@@ -91,7 +87,7 @@ void aes_gcm_decrypt(void)
 	unsigned char outbuf[1024];
 
 	printf("AES GCM Derypt:\nCiphertext:\n");
-	BIO_dump_fp(stdout, gcm_ct, sizeof(gcm_ct));
+	BIO_dump_fp(stdout, cipher_buffer, cipher_len);
 
 	// Create cipher ctx, set algo, iv and key
 	ctx = EVP_CIPHER_CTX_new();
@@ -100,20 +96,20 @@ void aes_gcm_decrypt(void)
 	EVP_DecryptInit_ex(ctx, NULL, NULL, gcm_key, gcm_iv);
 
 	/* Zero or more calls to specify any AAD */
-	EVP_DecryptUpdate(ctx, NULL, &outlen, gcm_aad, sizeof(gcm_aad));
+	EVP_DecryptUpdate(ctx, NULL, &plain_len, gcm_aad, sizeof(gcm_aad));
 
 	/* Decrypt plaintext */
-	EVP_DecryptUpdate(ctx, outbuf, &outlen, gcm_ct, sizeof(gcm_ct));
+	EVP_DecryptUpdate(ctx, plain_buffer, &plain_len, cipher_buffer, cipher_len);
 
 	/* Output decrypted block */
 	printf("Plaintext:\n");
-	BIO_dump_fp(stdout, outbuf, outlen);
+	BIO_dump_fp(stdout, plain_buffer, plain_len);
 
 	/* Set expected tag value. */
-	EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, sizeof(gcm_tag), (void *)gcm_tag);
+	EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, tag_len, (void *)tag_buffer);
 
 	/* Finalise: note get no output for GCM */
-	rv = EVP_DecryptFinal_ex(ctx, outbuf, &outlen);
+	rv = EVP_DecryptFinal_ex(ctx, plain_buffer, &plain_len);
 	/* Print out return value. If this is not successful authentication failed and plaintext is not trustworthy. */
 	printf("Tag Verify %s\n", rv > 0 ? "Successful!" : "Failed!");
 	EVP_CIPHER_CTX_free(ctx);
