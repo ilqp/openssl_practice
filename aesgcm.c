@@ -33,10 +33,8 @@ static const unsigned char gcm_aad[] = {
 	0x7f, 0xec, 0x78, 0xde
 };
 
-// unsigned char *cipher_buffer;
-unsigned char *plain_buffer;
 unsigned char tag_buffer[16];
-int cipher_len, plain_len, tag_len;
+int tag_len;
 
 FOPS_TYPE input;
 FOPS_TYPE cipher;
@@ -45,8 +43,6 @@ FOPS_TYPE plaintext;
 void aes_gcm_encrypt(void)
 {
 	EVP_CIPHER_CTX *ctx;
-	int outlen, tmplen;
-	unsigned char outbuf[1024];
 
 	cipher.length = input.length;
 	cipher.data = (unsigned char *) malloc(sizeof(unsigned char)*cipher.length);
@@ -87,8 +83,7 @@ void aes_gcm_encrypt(void)
 void aes_gcm_decrypt(void)
 {
 	EVP_CIPHER_CTX *ctx;
-	int outlen, tmplen, rv;
-	unsigned char outbuf[1024];
+	int rv;
 
 	plaintext.length = cipher.length;
 	plaintext.data = (unsigned char *) malloc(sizeof(unsigned char) * plaintext.length);

@@ -35,14 +35,29 @@ else()
 endif()
 
 ######################################################################
-# 	Openssl stuff
+# 	AES GCM stuff
 ######################################################################
 FILE(GLOB AESGCM_SOURCES aesgcm.c fops.c)
-ADD_EXECUTABLE(aesgcm ${AESGCM_SOURCES})
-TARGET_LINK_LIBRARIES(aesgcm ${OPENSSL_LIBRARY})
-TARGET_INCLUDE_DIRECTORIES(aesgcm PUBLIC ${OPENSSL_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+ADD_EXECUTABLE(aesgcm
+	${AESGCM_SOURCES})
 
+TARGET_LINK_LIBRARIES(aesgcm
+	${OPENSSL_LIBRARY})
+
+TARGET_INCLUDE_DIRECTORIES(aesgcm
+	PUBLIC
+	${OPENSSL_INCLUDE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR})
+
+SET_TARGET_PROPERTIES(aesgcm
+	PROPERTIES
+	COMPILE_FLAGS
+	"-Wall")
+
+######################################################################
+# 	Run target
+######################################################################
 ADD_CUSTOM_TARGET(run
 	COMMAND ./aesgcm
 	DEPENDS aesgcm
-	WORKING_DIRECTORY ${CMAKE_PRJECT_DIR} )
+	WORKING_DIRECTORY ${CMAKE_PRJECT_DIR})
