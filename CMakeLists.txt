@@ -37,19 +37,41 @@ endif()
 ######################################################################
 # 	AES GCM stuff
 ######################################################################
+SET(AES_GCM aesgcm)
 FILE(GLOB AESGCM_SOURCES aesgcm.c fops.c)
-ADD_EXECUTABLE(aesgcm
+ADD_EXECUTABLE(${AES_GCM}
 	${AESGCM_SOURCES})
 
-TARGET_LINK_LIBRARIES(aesgcm
+TARGET_LINK_LIBRARIES(${AES_GCM}
 	${OPENSSL_LIBRARY})
 
-TARGET_INCLUDE_DIRECTORIES(aesgcm
+TARGET_INCLUDE_DIRECTORIES(${AES_GCM}
 	PUBLIC
 	${OPENSSL_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR})
 
-SET_TARGET_PROPERTIES(aesgcm
+SET_TARGET_PROPERTIES(${AES_GCM}
+	PROPERTIES
+	COMPILE_FLAGS
+	"-Wall")
+
+######################################################################
+# 	AES 256 stuff
+######################################################################
+SET(AES_256 aes_256)
+FILE(GLOB AES_256_SOURCES aes.c fops.c)
+ADD_EXECUTABLE(${AES_256}
+	${AES_256_SOURCES})
+
+TARGET_LINK_LIBRARIES(${AES_256}
+	${OPENSSL_LIBRARY})
+
+TARGET_INCLUDE_DIRECTORIES(${AES_256}
+	PUBLIC
+	${OPENSSL_INCLUDE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR})
+
+SET_TARGET_PROPERTIES(${AES_256}
 	PROPERTIES
 	COMPILE_FLAGS
 	"-Wall")
@@ -57,7 +79,12 @@ SET_TARGET_PROPERTIES(aesgcm
 ######################################################################
 # 	Run target
 ######################################################################
-ADD_CUSTOM_TARGET(run
-	COMMAND ./aesgcm
-	DEPENDS aesgcm
+ADD_CUSTOM_TARGET(run_${AES_256}
+	COMMAND ./${AES_256}
+	DEPENDS ${AES_256}
+	WORKING_DIRECTORY ${CMAKE_PRJECT_DIR})
+
+ADD_CUSTOM_TARGET(run_${AES_GCM}
+	COMMAND ./${AES_GCM}
+	DEPENDS ${AES_GCM}
 	WORKING_DIRECTORY ${CMAKE_PRJECT_DIR})

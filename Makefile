@@ -12,7 +12,8 @@ CFLAGS = $(OPENSSL_INCS_LOCATION)
 LDFLAGS = $(OPENSSL_LIBS_LOCATION) -lssl -lcrypto
 
 define run
-	cd build && ./aesgcm
+	# make -C build run_aes_gcm
+	make -C build run_aes_256
 endef
 
 all: aesccm aesgcm
